@@ -1,0 +1,51 @@
+# ===========================================================
+# Dashboard de Mensajería · BDI Consultora
+# ===========================================================
+# Las versiones están fijadas a propósito. Sin fijar, cada redeploy instala
+# lo último de todo y el 25/09/2026 esa combinación abortó el proceso con
+# "malloc(): unsorted double linked list corrupted" (corrupción de heap en la
+# capa nativa de pyarrow/pandas 3, no en el código de la app).
+#
+# Antes de mover cualquier tope de versión, probar el deploy y mirar los logs.
+# ===========================================================
+
+# FIJADA EXACTA, no en rango. Streamlit no es solo Python: trae su propio
+# frontend compilado en archivos .js que el navegador baja aparte. Con un rango,
+# cada redeploy podía instalar una versión distinta, y el navegador terminaba
+# pidiendo archivos .js que ya no existían. Ese es el error
+#   "TypeError: Failed to fetch dynamically imported module .../static/js/..."
+# repetido en cada widget de la pantalla (03/11/2026).
+# Esta es la versión contra la que está probado el tablero entero.
+streamlit==1.66.1
+
+# pandas 3.x pasa los strings a Arrow por defecto y es la combinación que rompió.
+# La serie 2.2 es estable y no requiere ningún cambio en el código.
+pandas>=2.2,<3.0
+
+# numpy 2.5 es muy nuevo para el resto del stack compilado.
+numpy>=1.26,<2.3
+
+# pyarrow lo usa Streamlit para pasar los DataFrames al navegador.
+# La 25 tiene un segfault conocido (apache/arrow#50471) y la 24 tampoco aguantó.
+pyarrow>=14,<19
+
+# plotly también entrega JS al navegador, y Streamlit lo carga como módulo
+# dinámico: mismo riesgo que arriba. Fijada exacta por el mismo motivo.
+# plotly 7 es un salto mayor; la serie 5 cubre todo lo que usa el tablero.
+plotly==5.24.1
+
+openpyxl>=3.1,<4
+holidays>=0.40,<1
+jinja2>=3.1,<4
+gdown>=5.1,<7
+
+# Acceso a Google Drive (listado y descarga autenticada de las planillas).
+google-api-python-client>=2.100,<3
+google-auth>=2.30,<3
+
+# ---- Reporte PDF ----
+# kaleido convierte los gráficos de Plotly en imágenes. La 0.2.1 trae su propio
+# chromium embebido; las versiones 1.x exigen un Chrome instalado en el servidor,
+# que en Streamlit Cloud no existe. NO subir de 0.2.1.
+kaleido==0.2.1
+reportlab>=4.0,<5
